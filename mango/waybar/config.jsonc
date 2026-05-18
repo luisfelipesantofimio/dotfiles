@@ -1,0 +1,258 @@
+{
+  "layer": "top",
+  "position": "top",
+  "exclusive": true,
+  "passthrough": false,
+  "gtk-layer-shell": true,
+  "ipc": false,
+  "reload_style_on_change": true,
+  "height": 20,
+  "modules-left": [
+    "ext/workspaces",
+    "wlr/taskbar",
+    "custom/playerctl"
+  ],
+  "modules-center": [
+    "dwl/window"
+  ],
+  "modules-right": [
+    "tray",
+    "wireplumber",
+    "cpu",
+    "memory",
+    "backlight",
+    "battery",
+    "clock",
+    "custom/notification",
+    "custom/power"
+  ],
+  "ext/workspaces": {
+    "format": "{icon}",
+    "ignore-hidden": true,
+    
+    "on-click": "activate",
+    "on-click-right": "deactivate",
+    "on-scroll-up": "mmsg -d viewtoleft_have_client",
+    "on-scroll-down": "mmsg -d viewtoright_have_client",
+    "sort-by-id": true,
+  },
+  "dwl/tags": {
+    "num-tags": 9,
+    "hide-vacant": true,
+  },
+  "dwl/window": {
+    "format": "[{layout}]{title}",
+    "on-click": "bash ~/.config/mango/scripts/screenshot.sh"
+  },
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "<span foreground='red'><sup></sup></span>",
+      "none": "  ",
+      "dnd-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "sleep 0.1s && swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+  "keyboard-state": {
+    "numlock": false,
+    "scrolllock": false,
+    "capslock": true,
+    "format": "{icon}",
+    "format-icons": {
+      "locked": "Capslock",
+      "unlocked": ""
+    }
+  },
+  "cpu": {
+    "interval": 2,
+    "format": "  {usage}%"
+  },
+  "memory": {
+    "interval": 30,
+    "format": "  {}%",
+    "max-length": 10
+  },
+  "wlr/taskbar": {
+    "format": "{icon}",
+    "icon-size": 22,
+    "all-outputs": false,
+    "tooltip-format": "{title}",
+    "markup": true,
+    "on-click": "activate",
+    "on-click-right": "close",
+    "ignore-list": [
+      "Rofi",
+      "wofi"
+    ]
+  },
+  "backlight": {
+    "interval": 2,
+    "device": "amdgpu_bl0",
+    "format": "{icon}  {percent}%",
+    "format-icons": [
+      "󰖔",
+      "󰖨"
+    ],
+    "on-scroll-up": "brightnessctl set +1%",
+    "on-scroll-down": "brightnessctl set 1%-",
+    "smooth-scrolling-threshold": 1
+  },
+  "idle_inhibitor": {
+    "tooltip": false,
+    "format": "{icon}",
+    "start-activated": false,
+    "format-icons": {
+      "activated": " ",
+      "deactivated": " "
+    }
+  },
+  "tray": {
+    "interval": 1,
+    "icon-size": 21,
+    "spacing": 10
+  },
+  "clock": {
+    "locale": "es_CO.UTF-8",
+    "format-alt": "{:%A, %d de %B  %I:%M %p}  ",
+    "format": "{:%I:%M %p} ",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "on-click": "toggle-calendar",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'><b>{}</b></span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
+    }
+  },
+  "wireplumber": {
+    "format": "{icon}  {volume}%",
+    "tooltip": false,
+    "format-muted": "󰝟",
+    "on-click": "pavucontrol",
+    "on-scroll-up": "bash ~/.config/mango/scripts/volume.sh up",
+    "on-scroll-down": "bash ~/.config/mango/scripts/volume.sh down",
+    "scroll-step": 5,
+    "max-volume": 150,
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": [
+        "",
+        "",
+        ""
+      ]
+    }
+  },
+  "custom/power": {
+    "format": " ",
+    "tooltip": false,
+    "on-click": "wlogout -l ~/.config/mango/wlogout/layout --protocol layer-shell",
+    "menu": "on-click-right",
+    "menu-file": "/home/luis/.config/mango/waybar/battery_menu.xml",
+    "menu-actions": {
+      "performance": "bash ~/.config/mango/scripts/power-profile --performance",
+      "schedutil": "bash ~/.config/mango/scripts/power-profile --schedutil"
+    }
+  },
+  "wireplumber#microphone": {
+    "format": "{format_source}",
+    "format-source": " {volume}%",
+    "tooltip": false,
+    "format-source-muted": " Muted",
+    "on-click": "pamixer --default-source -t",
+    "on-scroll-up": "pamixer --default-source -i 2",
+    "on-scroll-down": "pamixer --default-source -d 2",
+    "scroll-step": 5
+  },
+  "custom/playerctl": {
+    "format": "{icon} {text}",
+    "return-type": "json",
+    "exec-if": "which playerctl",
+    "exec": "bash ~/.config/mango/scripts/playerctl-waybar.sh",
+    "interval": 2,
+    "markup": true,
+    "tooltip": false,
+    "on-click-middle": "bash ~/.config/mango/scripts/playerctl-waybar.sh previous",
+    "on-click": "bash ~/.config/mango/scripts/playerctl-waybar.sh play-pause",
+    "on-click-right": "bash ~/.config/mango/scripts/playerctl-waybar.sh next",
+    "on-click-forward": "bash ~/.config/mango/scripts/playerctl-waybar.sh position 10+",
+    "on-click-backward": "bash ~/.config/mango/scripts/playerctl-waybar.sh position 10-",
+    "on-scroll-up": "bash ~/.config/mango/scripts/playerctl-waybar.sh volume 0.02+",
+    "on-scroll-down": "bash ~/.config/mango/scripts/playerctl-waybar.sh volume 0.02-",
+    "format-icons": {
+      "Playing": "",
+      "Paused": "",
+      "Stopped": ""
+    }
+  },
+  "cava": {
+    "framerate": 30,
+    "autosens": 0,
+    "sensitivity": 38,
+    "bars": 8,
+    "lower_cutoff_freq": 50,
+    "higher_cutoff_freq": 12000,
+    "method": "pulse",
+    "hide_on_silence": false,
+    "sleep_timer": 5,
+    "source": "auto",
+    "stereo": false,
+    "reverse": false,
+    "bar_delimiter": 0,
+    "monstercat": false,
+    "waves": false,
+    "noise_reduction": 0.77,
+    "input_delay": 0,
+    "format-icons": [
+      "▁",
+      "▂",
+      "▃",
+      "▄",
+      "▅",
+      "▆",
+      "▇",
+      "█"
+    ],
+    "actions": {
+      "on-click-right": "mode"
+    }
+  },
+  "battery": {
+    "interval": 1800,
+    "states": {
+      "warning": 20,
+      "critical": 10
+    },
+    "format": "{icon}  {capacity}%",
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "max-length": 25
+  }
+}

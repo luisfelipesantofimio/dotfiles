@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  --performance)
+    if command -v powerprofilesctl >/dev/null 2>&1; then
+      powerprofilesctl set performance
+    else
+      for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+        printf 'performance' > "$f"
+      done
+    fi
+    ;;
+  --schedutil)
+    if command -v powerprofilesctl >/dev/null 2>&1; then
+      powerprofilesctl set balance-performance
+    else
+      for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+        printf 'schedutil' > "$f"
+      done
+    fi
+    ;;
+  *)
+    echo "Usage: $0 --performance|--schedutil" >&2
+    exit 1
+    ;;
+esac

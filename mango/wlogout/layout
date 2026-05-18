@@ -1,0 +1,20 @@
+{
+    "label" : "shutdown",
+    "action" : "shutdown -h now",
+    "text" : " Shutdown",
+    "keybind" : "d"
+}
+
+{
+    "label" : "reboot",
+    "action" : "reboot",
+    "text" : " Reboot",
+    "keybind" : "r"
+}
+
+{
+    "label" : "suspend",
+    "action" : "systemctl suspend",
+    "text" : " Suspend",
+    "keybind" : "s"
+}
