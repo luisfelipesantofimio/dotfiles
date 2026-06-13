@@ -68,11 +68,4 @@ start_if_available sway-audio-idle-inhibit
 start_if_available swayosd-server
 
 # Permission authentication
-if command -v xfce-polkit >/dev/null 2>&1; then
-    start_if_available xfce-polkit
-elif [ -x "/usr/lib/xfce-polkit/xfce-polkit" ]; then
-    start_if_available "/usr/lib/xfce-polkit/xfce-polkit"
-elif command -v /usr/lib/xfce-polkit/xfce-polkit >/dev/null 2>&1; then
-    start_if_available "/usr/lib/xfce-polkit/xfce-polkit"
-elif command -v  /usr/lib/polkit-gnome >/dev/null 2>&1; then
-    start_if_available /usr/lib/polkit-gnome
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
