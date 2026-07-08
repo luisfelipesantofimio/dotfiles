@@ -9,6 +9,9 @@ vim.pack.add({
   -- Core libs
   { src = "https://github.com/nvim-lua/plenary.nvim" },
 
+  -- Treesitter parser installer + queries (main branch, works with native vim.treesitter)
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+
   -- UX / motion / icons (all from mini.nvim)
   { src = "https://github.com/echasnovski/mini.nvim" },
 
@@ -62,6 +65,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 -- Plugin configs (load order matters: theme, then mini, then everything else).
 require("plugins.colorscheme")
+require("plugins.treesitter")
 require("plugins.mini")
 require("plugins.statusline")
 require("plugins.whichkey")

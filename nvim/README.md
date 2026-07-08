@@ -94,11 +94,15 @@ To update plugins later: `:lua vim.pack.update()`. To remove a plugin (after del
 
 ---
 
-## Treesitter (native only)
+## Treesitter (native runtime)
 
-There is no `nvim-treesitter` plugin — highlighting, indent, and folds come from core `vim.treesitter`. The autocmd in `lua/config/autocmds.lua` starts the highlighter on every `FileType` *if* a parser is installed; otherwise the buffer falls back to Vim regex syntax.
+Highlighting, indent, and folds come from core `vim.treesitter` — there is no `nvim-treesitter` highlight module. The autocmd in `lua/config/autocmds.lua` starts the native highlighter on every `FileType` *if* a parser is installed; otherwise the buffer falls back to Vim regex syntax.
 
-Neovim 0.12 ships parsers + queries for: `c`, `lua`, `vim`, `vimdoc`, `query`, `markdown`, `markdown_inline`. Anything else needs a manual install — see [Adding a treesitter parser](#adding-a-treesitter-parser).
+Parsers are installed by the `nvim-treesitter` **`main` branch**, used purely as a parser installer/query provider (see `lua/plugins/treesitter.lua`). It fetches parsers into its install dir (on the runtimepath) and ships Neovim-compatible queries; the native autocmd above then picks them up. `ts.install()` is async and idempotent, so it's re-run on every startup and only fetches what's missing.
+
+Neovim 0.12 also ships parsers + queries for: `c`, `lua`, `vim`, `vimdoc`, `query`, `markdown`, `markdown_inline`.
+
+To add a language, append it to the `ensure` list in `lua/plugins/treesitter.lua` (e.g. `go`, `gomod`, `gowork`, `gotmpl` are already there) and restart, or run `:lua require("nvim-treesitter").install({ "<lang>" })`. A fully manual route is still documented in [Adding a treesitter parser](#adding-a-treesitter-parser).
 
 ---
 
@@ -466,7 +470,7 @@ If the parser repo doesn't ship Neovim-compatible queries, grab them from the [`
 - **Plugins didn't update** — `:lua vim.pack.update()`. To force a re-checkout: `:lua vim.pack.update({ "<plugin>" }, { force = true })`. To remove: `:lua vim.pack.del({ "<plugin>" })`.
 - **fzf-native missing build** — `cd ~/.local/share/nvim/site/pack/core/opt/telescope-fzf-native.nvim && make`, or `:lua vim.pack.update({ "telescope-fzf-native.nvim" }, { force = true })` to retrigger the `PackChanged` build hook.
 - **LSP not attaching** — `:checkhealth vim.lsp` (or `<leader>lI`). Confirm the server binary is on `PATH` (`:!which clangd`, etc.). Make sure your project has one of the configured `root_markers` somewhere up the tree.
-- **Treesitter highlighting absent** — there is no parser installer. Drop a parser at `~/.config/nvim/parser/<lang>.so` and queries at `~/.config/nvim/queries/<lang>/`. Without a parser the file falls back to Vim regex syntax — that's by design.
+- **Treesitter highlighting absent** — check the parser installed: `:checkhealth nvim-treesitter` or `:lua print(vim.treesitter.language.add("<lang>"))`. Add the language to the `ensure` list in `lua/plugins/treesitter.lua` (or `:lua require("nvim-treesitter").install({ "<lang>" })`). Without a parser the file falls back to Vim regex syntax — that's by design.
 - **blink.cmp errors about a missing binary** — make sure the spec keeps `version = vim.version.range("^1")`. The prebuilt fuzzy library is downloaded only on tagged releases.
 - **`<leader>Sf` opens but the prompt doesn't react** — confirm you're in the prompt buffer (insert mode by default). `<Esc>` drops to normal-mode picker bindings, `<C-c>` closes.
 - **Auto-quit on tree-only window fires unexpectedly** — the gate is "did the user open a real buffer this session?". If it triggers wrongly, check `lua/plugins/tree.lua`'s `opened_real_buffer` flag logic.
