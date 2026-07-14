@@ -75,6 +75,8 @@ sudo pacman -S --needed --noconfirm \
     transmission-gtk \
     yazi \
     flatpak \
+    raylib \
+    gamemode \
     gnome-software \
     bottom \
     polkit-gnome \
@@ -179,6 +181,8 @@ yay -S --needed --noconfirm \
     stockfish \
     heroic-games-launcher-bin \
     pixieditor-bin \
+    esp-idf \
+    xboxdrv \
     defold-bin
 
 echo "Install astro language server from NPM"
