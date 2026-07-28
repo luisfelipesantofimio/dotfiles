@@ -57,8 +57,8 @@ vim.pack.add({
 
   { src = 'https://github.com/mistweaverco/kulala.nvim' },
 
-  -- Animated cursor trail
   { src = "https://github.com/sphamba/smear-cursor.nvim" },
+  {src = 'https://github.com/joerdav/templ.vim'}
 })
 
 -- Build native bits after install or update.

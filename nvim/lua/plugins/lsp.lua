@@ -124,7 +124,7 @@ local servers = {
   "lemminx", "jsonls", "yamlls", "marksman",
   "pyright", "taplo",
   "elixirls", "erlang_ls",
-  "astro", "asm",
+  "astro", "asm", "templ"
 }
 for _, name in ipairs(servers) do
   local server_ok, cfg = pcall(require, "lsp." .. name)
