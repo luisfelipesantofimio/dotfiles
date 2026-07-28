@@ -12,6 +12,16 @@ vim.pack.add({
   -- Treesitter parser installer + queries (main branch, works with native vim.treesitter)
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
 
+  -- Sticky treesitter context bar (current function/class at the top of the window)
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter-context" },
+
+  -- Debug Adapter Protocol (Go debugging via Delve)
+  { src = "https://github.com/mfussenegger/nvim-dap" },
+  { src = "https://github.com/leoluz/nvim-dap-go" },
+  { src = "https://github.com/nvim-neotest/nvim-nio" },
+  { src = "https://github.com/rcarriga/nvim-dap-ui" },
+  { src = "https://github.com/theHamsta/nvim-dap-virtual-text" },
+
   -- UX / motion / icons (all from mini.nvim)
   { src = "https://github.com/echasnovski/mini.nvim" },
 
@@ -45,7 +55,10 @@ vim.pack.add({
 
   { src = 'https://github.com/saghen/blink.lib' },
 
-  { src = 'https://github.com/mistweaverco/kulala.nvim' }
+  { src = 'https://github.com/mistweaverco/kulala.nvim' },
+
+  -- Animated cursor trail
+  { src = "https://github.com/sphamba/smear-cursor.nvim" },
 })
 
 -- Build native bits after install or update.
@@ -66,6 +79,8 @@ vim.api.nvim_create_autocmd("PackChanged", {
 -- Plugin configs (load order matters: theme, then mini, then everything else).
 require("plugins.colorscheme")
 require("plugins.treesitter")
+require("plugins.treesitter-context")
+require("plugins.dap")
 require("plugins.mini")
 require("plugins.statusline")
 require("plugins.whichkey")
@@ -78,3 +93,5 @@ require("plugins.lsp")
 require("plugins.aerial")
 require("plugins.flutter")
 require("plugins.sessions")
+require("plugins.smear-cursor")
+require("plugins.pack")

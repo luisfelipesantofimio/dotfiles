@@ -18,6 +18,7 @@ plugins.
 | `ripgrep` (`rg`) | required | `live_grep` and `grepprg` |
 | Nerd Font (terminal-side) | required | mini.icons, statusline, file-explorer glyphs |
 | `lazygit` | optional | `<leader>tg` floats it |
+| `delve` (`dlv`) | required for Go debugging | `brew install delve` or `go install github.com/go-delve/delve/cmd/dlv@latest` |
 
 ### Language servers
 
@@ -53,7 +54,7 @@ There is no in-Neovim installer (Mason is intentionally not used). Install each 
 3. Install whichever language servers you need (see the table above). They'll auto-attach the next time you open a matching file; no further config needed.
 4. Open a real project file (not just `nvim`) so the server picks up `root_markers`.
 
-To update plugins later: `:lua vim.pack.update()`. To remove a plugin (after deleting it from `lua/config/plugins.lua`): `:lua vim.pack.del({ "<name>" })`.
+To update plugins later: `<leader>Pu` (opens a confirm buffer, `:w` applies) or `<leader>PU` (updates everything without confirming). To remove a plugin (after deleting it from `lua/config/plugins.lua`): `:lua vim.pack.del({ "<name>" })`.
 
 ---
 
@@ -91,6 +92,12 @@ To update plugins later: `:lua vim.pack.update()`. To remove a plugin (after del
 | `saghen/blink.cmp` (`^1`) | LSP completion — prebuilt binaries auto-fetched |
 | `nvim-flutter/flutter-tools.nvim` | Flutter/Dart tooling; manages `dartls` itself |
 | `nvim-lua/plenary.nvim` | telescope dependency |
+| `nvim-treesitter/nvim-treesitter-context` | sticky context bar (current function/class at top of window) |
+| `mfussenegger/nvim-dap` | Debug Adapter Protocol client |
+| `leoluz/nvim-dap-go` | Go debug adapter config (drives `dlv`) |
+| `rcarriga/nvim-dap-ui` (+ `nvim-neotest/nvim-nio`) | debug UI: scopes, breakpoints, stacks, watches, REPL |
+| `theHamsta/nvim-dap-virtual-text` | inline variable values while debugging |
+| `sphamba/smear-cursor.nvim` | animated cursor trail |
 
 ---
 
@@ -103,6 +110,8 @@ Parsers are installed by the `nvim-treesitter` **`main` branch**, used purely as
 Neovim 0.12 also ships parsers + queries for: `c`, `lua`, `vim`, `vimdoc`, `query`, `markdown`, `markdown_inline`.
 
 To add a language, append it to the `ensure` list in `lua/plugins/treesitter.lua` (e.g. `go`, `gomod`, `gowork`, `gotmpl` are already there) and restart, or run `:lua require("nvim-treesitter").install({ "<lang>" })`. A fully manual route is still documented in [Adding a treesitter parser](#adding-a-treesitter-parser).
+
+`nvim-treesitter-context` (`lua/plugins/treesitter-context.lua`) pins the enclosing function/class/block to the top of the window as you scroll through its body. It reads treesitter queries directly, so it works on top of whatever parsers are installed above — no separate setup. Toggle it with `<leader>lx`.
 
 ---
 
@@ -219,6 +228,7 @@ The tree alone is allowed at startup (e.g. `nvim .`). Once you've opened any rea
 | `<leader>lo` | toggle outline panel (aerial) |
 | `<leader>lO` | workspace symbols (telescope) |
 | `<leader>lN` | symbol navigator (aerial floating) |
+| `<leader>lx` | toggle sticky context bar (treesitter-context) |
 | `<leader>li` | toggle inlay hints |
 | `<leader>ll` / `<leader>lT` | run / refresh code lens |
 | `<leader>lwa` / `<leader>lwr` / `<leader>lwl` | workspace folder add / remove / list |
@@ -230,6 +240,33 @@ The tree alone is allowed at startup (e.g. `nvim .`). Once you've opened any rea
 |------|--------|
 | `<leader>xd` | line diagnostics float |
 | `<leader>xq` | diagnostics → loclist |
+
+### Debug (nvim-dap)
+
+Requires `dlv` on `PATH` (see [System tools](#system-tools)). `nvim-dap-go` provides
+the Go adapter/configs; `nvim-dap-ui` opens automatically when a session starts
+and closes when it ends; `nvim-dap-virtual-text` shows variable values inline
+while stopped.
+
+| Keys | Action |
+|------|--------|
+| `<leader>db` | toggle breakpoint |
+| `<leader>dB` | conditional breakpoint (prompts for condition) |
+| `<leader>dc` | continue / start session |
+| `<leader>di` / `<leader>do` / `<leader>dO` | step into / over / out |
+| `<leader>dr` | toggle REPL |
+| `<leader>du` | toggle debug UI |
+| `<leader>dl` | run last |
+| `<leader>dx` | terminate session |
+| `<leader>dgt` | (Go) debug nearest test |
+| `<leader>dgl` | (Go) debug last test |
+
+### Packages (vim.pack)
+
+| Keys | Action |
+|------|--------|
+| `<leader>Pu` | check for updates; opens a confirm buffer — `:w` (or save normally) applies the selected updates, closing the window cancels |
+| `<leader>PU` | update everything immediately, no confirmation |
 
 ### Sessions
 
@@ -320,6 +357,25 @@ A walkthrough of how each piece is wired and where to look in the code.
 - Capabilities are merged from blink.cmp via `vim.lsp.config("*", { capabilities = ... })`.
 - `LspAttach` autocmd sets buffer-local keymaps, enables inlay hints, hooks `CursorHold` document-highlight, and (where supported) wires code-lens shortcuts.
 - `flutter-tools.nvim` is the one carve-out: it owns dartls and is **not** in the `servers` list (it would double-attach).
+
+### Debugging (nvim-dap + dap-go + dap-ui + virtual-text) — `lua/plugins/dap.lua`
+
+- `dap-go.setup()` registers the Go adapter, which shells out to `dlv dap` — no
+  manual adapter config needed. It also exposes `debug_test()` /
+  `debug_last_test()`, used by `<leader>dgt` / `<leader>dgl`.
+- `dap.listeners.after.event_initialized` / `before.event_terminated` /
+  `before.event_exited` open and close `dapui` automatically, so the panel
+  tracks the session lifecycle instead of needing manual toggling.
+- Breakpoint/stopped signs reuse the existing `DiagnosticSignError/Warn/Info/Hint`
+  highlight groups (same ones the LSP diagnostics use — see `lua/plugins/lsp.lua`)
+  so the gutter stays visually consistent instead of introducing new colors.
+- `nvim-dap-virtual-text` renders variable values at end-of-line while a session
+  is stopped; no extra wiring — it listens to `nvim-dap` events itself.
+
+### Cursor trail (smear-cursor) — `lua/plugins/smear-cursor.lua`
+
+- `require("smear_cursor").setup()` with defaults — no config overrides.
+- `:SmearCursorToggle` (built into the plugin) turns the effect on/off for the session if it's distracting.
 
 ### Outline (aerial) — `lua/plugins/aerial.lua`
 
@@ -467,7 +523,7 @@ If the parser repo doesn't ship Neovim-compatible queries, grab them from the [`
 
 ## Troubleshooting
 
-- **Plugins didn't update** — `:lua vim.pack.update()`. To force a re-checkout: `:lua vim.pack.update({ "<plugin>" }, { force = true })`. To remove: `:lua vim.pack.del({ "<plugin>" })`.
+- **Plugins didn't update** — `<leader>Pu` opens a confirm buffer listing pending updates; it does nothing until you save it (`:w`) — closing the window without saving cancels. `<leader>PU` skips the confirm step entirely. To force a re-checkout of one plugin: `:lua vim.pack.update({ "<plugin>" }, { force = true })`. To remove: `:lua vim.pack.del({ "<plugin>" })`.
 - **fzf-native missing build** — `cd ~/.local/share/nvim/site/pack/core/opt/telescope-fzf-native.nvim && make`, or `:lua vim.pack.update({ "telescope-fzf-native.nvim" }, { force = true })` to retrigger the `PackChanged` build hook.
 - **LSP not attaching** — `:checkhealth vim.lsp` (or `<leader>lI`). Confirm the server binary is on `PATH` (`:!which clangd`, etc.). Make sure your project has one of the configured `root_markers` somewhere up the tree.
 - **Treesitter highlighting absent** — check the parser installed: `:checkhealth nvim-treesitter` or `:lua print(vim.treesitter.language.add("<lang>"))`. Add the language to the `ensure` list in `lua/plugins/treesitter.lua` (or `:lua require("nvim-treesitter").install({ "<lang>" })`). Without a parser the file falls back to Vim regex syntax — that's by design.
